@@ -107,9 +107,8 @@ def process_output_file(output_file_path):
 
         # Write the extracted items back to the same file, overwriting the original content
         with open(output_file_path, 'w', newline='', encoding='utf-8') as file:
-            writer = csv.writer(file)
             for item in first_items:
-                writer.writerow([item.strip('"')])
+                file.write(item.strip('"') + '\n')
 
         print(f"COMPLETED: {output_file_path} has all of the files.")
 
@@ -121,7 +120,7 @@ if __name__ == "__main__":
 
     wiztree_executable = "C:/Program Files/WizTree/WizTree64.exe"
 
-    filters = {"X": ["Videos\\Movies", "Videos\\TV"], "F": ["Videos\\Temporary"]}
+    filters = {"X": ["Videos\\Movies", "Videos\\TV"], "F": ["Videos\\Temporary", "Videos\\Plex"]}
     output_folder = "C:/WhatsGone"
 
     for drive, directories in filters.items():
