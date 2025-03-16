@@ -99,6 +99,10 @@ def process_output_file(output_file_path):
             output_file_path (str): The path to the output file to process.
         """
 
+        if not os.path.exists(output_file_path):
+            print(f"ERROR: {output_file_path} does not exist.")
+            return False
+
         # Read the output file and extract the first item from each row
         with open(output_file_path, 'r', encoding='utf-8') as file:
             reader = csv.reader(file)
@@ -112,6 +116,8 @@ def process_output_file(output_file_path):
 
         print(f"COMPLETED: {output_file_path} has all of the files.")
 
+        return True
+
 if __name__ == "__main__":
 
 
@@ -124,6 +130,16 @@ if __name__ == "__main__":
     output_folder = "C:/WhatsGone"
 
     for drive, directories in filters.items():
+
+        # Skip to the next item if the drive does not exist
+        if not os.path.exists(drive + ":\\"):
+            print(f"MISSING: Drive {drive}:\\ no longer exists. It's gone.")
+            missing_file_path = os.path.join(output_folder, f"{drive}_missing.txt")
+            with open(missing_file_path, 'a', encoding='utf-8') as missing_file:
+                missing_file.write(f"Drive {drive}:\\ is missing as of {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}.\n")
+            print(f"INFO: Missing drive note written to {missing_file_path}")
+            continue
+
         scan_drive = drive + ":"
         directory_to_scan = "|".join([f"\"{directory}\"" for directory in directories])
         output_file_path = rf"{output_folder}/{drive}_all.txt"
