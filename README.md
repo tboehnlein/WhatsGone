@@ -20,6 +20,8 @@ Python script should be run through Windows Task Scheduler with highest privelag
 It needs admin rights to work because of how it reads everything so quickly using the file table directly. 
 
 ## Helpful Links
+[Using Python with VS Code](https://code.visualstudio.com/docs/python/python-tutorial)
+
 [WizTree Download Page](https://diskanalyzer.com/download)
 
 [WizTree Command Line Arguments Page](https://diskanalyzer.com/guide#cmdlinecsv)
