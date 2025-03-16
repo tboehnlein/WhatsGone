@@ -1,5 +1,5 @@
 # Overview
-Everyone should backup their files. But they don't at all. Or don't do it often enough. Or don't have enough storage to do a backup. Tons of reasons. So what that happens and all of a sudden your E:\ drive is gone. The first question you ask is "What's gone?" Well this won't bring your files back, but you can at least know what you lost.
+Everyone should backup their files. But they don't at all. Or don't do it often enough. Or don't have enough storage to do a backup. Tons of reasons. So what that happens and all of a sudden your E:\ drive is gone. The first question you ask is **"What's gone?"** Well this won't bring your files back, but you can at least know what you lost.
 
 WizTree is a wonderful program that let's you see all of the files on your drive within seconds. Luckily, the software has a command line interface to read the drive and spit out a list of files. So instead of actually looking for everything on your drive file by file for many minutes or an hour or whatever, it's done in seconds.
 
