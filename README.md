@@ -1,0 +1,1 @@
+This is a simple program to make list of every file in a given set of directories on a single drive using WizTree. Python script should be run through Windows Scheduler with elevated rights to make it run on a schedule and to get rid of the WizTree UAC pop up.
