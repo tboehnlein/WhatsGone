@@ -42,7 +42,7 @@ def get_files_with_wiztree(wiztree_path, drive, tag, include_filter, exclude_fil
 
     try:
 
-        print(f"STARTED {tag}: Scanning {drive}\\ using include {include_filter} and exclude {exclude_filter}")
+        print(f"STARTED {tag}: Scanning {drive}\\ using include=\"{include_filter}\" and exclude=\"{exclude_filter}\"")
 
         # Ensure the folder path for the output file exists
         ensure_folder_exists(output_file_path)
@@ -147,24 +147,37 @@ if __name__ == "__main__":
     wiztree_executable = "C:/Program Files/WizTree/WizTree64.exe"
 
     scan_runs = {
-        "X": {
-            "Include": ["Videos\\Movies", "Videos\\TV"],
-            "Exclude": ["Windows"],
-            "Tag": "all",
+        "Everything": {
+            "Exclude": ["$", "WindowsApps"],
+            "Drive": "X",
             "Output": "C:/WhatsGone",
             "Backup": "D:/WhatsGone"
         },
-        "F": {
+        "TV Shows": {
+            "Include": ["Videos\\TV"],
+            #"Exclude": ["Windows"],
+            "Drive": "X",
+            "Output": "C:/WhatsGone",
+            "Backup": "D:/WhatsGone"
+        },
+        "Movies": {
+            "Include": ["Videos\\Movies"],
+            #"Exclude": ["Windows"],
+            "Drive": "X",
+            "Output": "C:/WhatsGone",
+            "Backup": "D:/WhatsGone"
+        },
+        "Plex": {
             "Include": ["Videos\\Temporary", "Videos\\Plex"],
-            "Exclude": ["Windows"],
-            "Tag": "all",
+            #"Exclude": ["Windows"],
+            "Drive": "F",
             "Output": "C:/WhatsGone",
             "Backup": "D:/WhatsGone"
         }
     }
     output_folder = "C:/WhatsGone"
 
-    for drive, scan_parameters in scan_runs.items():
+    for tag, scan_parameters in scan_runs.items():
         if "Include" in scan_parameters:
             include_filter = scan_parameters["Include"]
         else:
@@ -175,13 +188,14 @@ if __name__ == "__main__":
         else:
             exclude_filter = []
 
-        if "Tag" in scan_parameters:
-            tag = scan_parameters["Tag"] 
+        if "Drive" in scan_parameters:
+            drive = scan_parameters["Drive"] 
         else:
-            tag = "default"
+            print(f"MISSING: Drive parameter not specified. Skipping {tag} scan.")
+            continue
 
         scan_drive = drive + ":"
-        output_file_path = rf"{scan_parameters['Output']}/{drive}_{scan_parameters['Tag']}.txt"
+        output_file_path = rf"{scan_parameters['Output']}/{drive}_{tag}.txt"
         files_to_scan = "|".join([f"\"{directory}\"" for directory in include_filter])
         files_to_skip = "|".join([f"\"{directory}\"" for directory in exclude_filter])
 
@@ -198,7 +212,7 @@ if __name__ == "__main__":
         process_output_file(output_file_path)
 
         if "Backup" in scan_parameters:
-            backup_file_path = rf"{scan_parameters['Backup']}/{drive}_{scan_parameters['Tag']}.txt"
+            backup_file_path = rf"{scan_parameters['Backup']}/{drive}_{tag}.txt"
             ensure_folder_exists(backup_file_path)
 
             # Copy the output file to the backup location, overwriting if it exists
