@@ -122,11 +122,12 @@ if __name__ == "__main__":
     wiztree_executable = "C:/Program Files/WizTree/WizTree64.exe"
 
     filters = {"X": ["Videos\\Movies", "Videos\\TV"], "F": ["Videos\\Temporary"]}
+    output_folder = "C:/WhatsGone"
 
     for drive, directories in filters.items():
         scan_drive = drive + ":"
         directory_to_scan = "|".join([f"\"{directory}\"" for directory in directories])
-        output_file_path = rf"C:/WhatsGone/{drive}_all.txt"
+        output_file_path = rf"{output_folder}/{drive}_all.txt"
 
         get_files_with_wiztree(wiztree_executable, scan_drive, directory_to_scan, output_file_path)
         process_output_file(output_file_path)
