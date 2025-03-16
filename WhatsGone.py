@@ -109,6 +109,10 @@ def process_output_file(output_file_path):
             next(reader, None)  # Skip the header or first line
             first_items = [row[0] for row in reader if row and len(row) > 0]
 
+        if len(first_items) == 0:
+            print(f"ERROR: {output_file_path} has no files. Current files will not be overwritten.")
+            return False
+
         # Write the extracted items back to the same file, overwriting the original content
         with open(output_file_path, 'w', newline='', encoding='utf-8') as file:
             for item in first_items:
