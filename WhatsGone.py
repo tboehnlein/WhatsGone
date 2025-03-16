@@ -106,6 +106,7 @@ def process_output_file(output_file_path):
         # Read the output file and extract the first item from each row
         with open(output_file_path, 'r', encoding='utf-8') as file:
             reader = csv.reader(file)
+            # assume user is going to use the free version of WizTree
             next(reader, None)  # Skip the header or first line
             first_items = [row[0] for row in reader if row and len(row) > 0]
 
