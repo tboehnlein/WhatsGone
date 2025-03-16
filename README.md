@@ -6,7 +6,7 @@ WizTree is a wonderful program that let's you see all of the files on your drive
 This is the perfect software to use to archive a list of your files no matter how big the drive is.
 
 ## Operation
-If the drive is there, it will make a record of all of the files with their paths into a text file.
+If the drive is there, it will make a record of all of the files that match the filter patterns with their paths into a text file.
 
 If a drive is missing, a timestamped message will be recorded in a file so it is known when it is missing.
 
