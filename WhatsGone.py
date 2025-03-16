@@ -4,30 +4,40 @@ import psutil
 import time
 import csv
 
-def call_executable(executable_path, arguments):
-    try:
-        # Combine the executable path and arguments into a single list
-        command = [executable_path] + arguments
-        
-        # Run the executable with the arguments
-        result = subprocess.run(command, capture_output=True, text=True, check=True)
-        
-        # Print the output from the executable
-        print("Output:", result.stdout)
-        print("Error:", result.stderr)
-    except subprocess.CalledProcessError as e:
-        print(f"Error occurred: {e}")
-    except FileNotFoundError:
-        print("Executable not found. Please check the path.")
+"""
+This script provides functionality to interact with the WizTree application for scanning directories on a specified drive,
+extracting file information, and processing the results. It includes the following key components:
 
-# Example usage
-# executable = "path/to/your/executable"
-# args = ["--arg1", "value1", "--arg2", "value2"]
-# call_executable(executable, args)
+1. `get_files_with_wiztree`: A function to execute WizTree with specified parameters, filter directories, and export results to a file.
+2. `wait_for_process_to_finish`: A helper function to monitor and wait for a specific process to complete execution.
+3. Main script logic:
+    - Configures WizTree executable path, drive, and directories to scan.
+    - Executes WizTree to generate a file containing directory information.
+    - Processes the output file to extract only file paths and overwrite the file with just the file paths.
+
+The script is designed to work with administrative privileges and assumes WizTree is installed and accessible at the specified path.
+""" 
 
 def get_files_with_wiztree(wiztree_path, drive, directory, output_file):
-    try:
+    """
+    Executes the WizTree application to retrieve file information from a specified directory 
+    on a given drive and exports the results to an output file.
+    Args:
+        wiztree_path (str): The file path to the WizTree executable.
+        drive (str): The drive letter to scan (e.g., "C:").
+        directory (str): The directory to filter within the specified drive.
+        output_file (str): The file path where the WizTree output will be saved.
+    Raises:
+        subprocess.CalledProcessError: If the WizTree command fails to execute properly.
+        FileNotFoundError: If the WizTree executable is not found at the specified path.
+    Notes:
+        - This function requires administrative privileges to execute WizTree.
+        - The function waits for the WizTree process to finish before proceeding.
+        - Ensure that the WizTree executable is accessible and the provided paths are valid.
+    """
 
+
+    try:
         
         # Command to call WizTree with the specified directory and output file
         command = [wiztree_path, drive, f"/filter={directory}", f"/export=\"{output_file}\"", r"/admin=1", r"/exportfolders=0"]
@@ -49,13 +59,20 @@ def get_files_with_wiztree(wiztree_path, drive, directory, output_file):
     except FileNotFoundError:
         print("WizTree executable not found. Please check the path.")
 
-# Example usage
-# wiztree_executable = r"C:\Program Files\WizTree\WizTree64.exe"
-# directory_to_scan = "C:/path/to/directory"
-# output_file_path = "C:/path/to/output.txt"
-# get_files_with_wiztree(wiztree_executable, directory_to_scan, output_file_path)
-
 def wait_for_process_to_finish(process_name, check_interval=1):
+        """
+        Waits for a process with the specified name to finish execution.
+        This function continuously checks if a process with the given name is running.
+        It prints a message indicating that it is waiting for the process to finish
+        and pauses for the specified interval between checks. Once the process is no
+        longer running, it prints a confirmation message.
+        Args:
+            process_name (str): The name of the process to monitor. The comparison is case-insensitive.
+            check_interval (int, optional): The time interval (in seconds) between consecutive checks. Defaults to 1.
+        Returns:
+            None
+        """
+        
         while any(proc.name().lower() == process_name.lower() for proc in psutil.process_iter(attrs=['name'])):
             print(f"Waiting for {process_name} to finish...", end="\r", flush=True)
             time.sleep(check_interval)
@@ -63,41 +80,42 @@ def wait_for_process_to_finish(process_name, check_interval=1):
         print("")
         print(f"{process_name} has finished.")
 
+def process_output_file(output_file_path):
+        """
+        Reads the output file, extracts the first item from each row, 
+        and overwrites the file with the extracted items.
+        
+        Args:
+            output_file_path (str): The path to the output file to process.
+        """
+
+        # Read the output file and extract the first item from each row
+        with open(output_file_path, 'r', encoding='utf-8') as file:
+            reader = csv.reader(file)
+            next(reader, None)  # Skip the header or first line
+            first_items = [row[0] for row in reader if row and len(row) > 0]
+
+        # Write the extracted items back to the same file, overwriting the original content
+        with open(output_file_path, 'w', newline='', encoding='utf-8') as file:
+            writer = csv.writer(file)
+            for item in first_items:
+                writer.writerow([item])
+
+        print(f"{output_file_path} has all of the files.")
+
 if __name__ == "__main__":
-    # Example usage of call_executable
-    # executable = "path/to/your/executable"
-    # args = ["--arg1", "value1", "--arg2", "value2"]
-    # call_executable(executable, args)
 
-    # Example usage of get_files_with_wiztree
+
     # Get the current timestamp in the desired format
-    date_time = datetime.now().strftime("%Y%m%d_%H%M%S")
-    wiztree_executable = "C:/Program Files/WizTree/WizTree64.exe"
-    drive = "X:"
-    # directory_to_scan = "X:\\Videos\\Movies\\"
-    # output_file_path = rf"C:/WhatsGone/{date_time}_movies.txt"
-    # get_files_with_wiztree(wiztree_executable, drive, directory_to_scan, output_file_path)
+    #date_time = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    # directory_to_scan = "X:\\Videos\\TV Shows\\"
-    # output_file_path = rf"C:/WhatsGone/{date_time}_tv_shows.txt"
-    # get_files_with_wiztree(wiztree_executable, drive, directory_to_scan, output_file_path)
+    wiztree_executable = "C:/Program Files/WizTree/WizTree64.exe"
 
     drive = "X:"
     directories = ["Videos\\Movies", "Videos\\TV"]
     directory_to_scan = "|".join([f"\"{directory}\"" for directory in directories])
-    #directory_to_scan = f"\"{directory_to_scan}\""
-    #output_file_path = rf"C:/WhatsGone/{date_time}_all.txt"
     output_file_path = rf"C:/WhatsGone/X_all.txt"
     get_files_with_wiztree(wiztree_executable, drive, directory_to_scan, output_file_path)
 
-    # Read the output file and extract the first item from each row
-    with open(output_file_path, 'r', encoding='utf-8') as file:
-        reader = csv.reader(file)
-        next(reader, None)  # Skip the header or first line
-        first_items = [row[0] for row in reader if row and len(row) > 0]
-
-    # Write the extracted items back to the same file, overwriting the original content
-    with open(output_file_path, 'w', newline='', encoding='utf-8') as file:
-        writer = csv.writer(file)
-        for item in first_items:
-            writer.writerow([item])
+    # Call the function to process the output file
+    process_output_file(output_file_path)
