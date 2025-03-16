@@ -3,6 +3,7 @@ from datetime import datetime
 import psutil
 import time
 import csv
+import os
 
 """
 This script provides functionality to interact with the WizTree application for scanning directories on a specified drive,
@@ -38,6 +39,14 @@ def get_files_with_wiztree(wiztree_path, drive, directory, output_file):
 
 
     try:
+
+        print(f"STARTED: Scanning {drive}\\ using filter {directory}")
+
+        # Ensure the folder path for the output file exists
+        output_folder = os.path.dirname(output_file_path)
+        if not os.path.exists(output_folder):
+            os.makedirs(output_folder)
+            print(f"Created folder: {output_folder}")
         
         # Command to call WizTree with the specified directory and output file
         command = [wiztree_path, drive, f"/filter={directory}", f"/export=\"{output_file}\"", r"/admin=1", r"/exportfolders=0"]
@@ -49,11 +58,11 @@ def get_files_with_wiztree(wiztree_path, drive, directory, output_file):
         
         # Wait for WizTree to finish
         wait_for_process_to_finish("WizTree64.exe")
-        wait_for_process_to_finish("WizTree.exe")
+        #wait_for_process_to_finish("WizTree.exe")
 
         # Print the output from WizTree
-        print("WizTree Output:", result.stdout)
-        print("WizTree Error:", result.stderr)
+        # print("WizTree Output:", result.stdout)
+        # print("WizTree Error:", result.stderr)
     except subprocess.CalledProcessError as e:
         print(f"Error occurred while running WizTree: {e}")
     except FileNotFoundError:
@@ -77,8 +86,9 @@ def wait_for_process_to_finish(process_name, check_interval=1):
             print(f"Waiting for {process_name} to finish...", end="\r", flush=True)
             time.sleep(check_interval)
         
-        print("")
-        print(f"{process_name} has finished.")
+        print(f"Waiting for {process_name} to finish...")
+
+        print(f"DONE: {process_name} has finished")
 
 def process_output_file(output_file_path):
         """
@@ -99,9 +109,9 @@ def process_output_file(output_file_path):
         with open(output_file_path, 'w', newline='', encoding='utf-8') as file:
             writer = csv.writer(file)
             for item in first_items:
-                writer.writerow([item])
+                writer.writerow([item.strip('"')])
 
-        print(f"{output_file_path} has all of the files.")
+        print(f"COMPLETED: {output_file_path} has all of the files.")
 
 if __name__ == "__main__":
 
@@ -111,11 +121,12 @@ if __name__ == "__main__":
 
     wiztree_executable = "C:/Program Files/WizTree/WizTree64.exe"
 
-    drive = "X:"
-    directories = ["Videos\\Movies", "Videos\\TV"]
-    directory_to_scan = "|".join([f"\"{directory}\"" for directory in directories])
-    output_file_path = rf"C:/WhatsGone/X_all.txt"
-    get_files_with_wiztree(wiztree_executable, drive, directory_to_scan, output_file_path)
+    filters = {"X": ["Videos\\Movies", "Videos\\TV"], "F": ["Videos\\Temporary"]}
 
-    # Call the function to process the output file
-    process_output_file(output_file_path)
+    for drive, directories in filters.items():
+        scan_drive = drive + ":"
+        directory_to_scan = "|".join([f"\"{directory}\"" for directory in directories])
+        output_file_path = rf"C:/WhatsGone/{drive}_all.txt"
+
+        get_files_with_wiztree(wiztree_executable, scan_drive, directory_to_scan, output_file_path)
+        process_output_file(output_file_path)
