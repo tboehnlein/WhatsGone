@@ -258,13 +258,14 @@ if __name__ == "__main__":
         output_file_path = rf"{scan_parameters['Output']}/{drive}_{tag}.txt"
         files_to_scan = "|".join([f"\"{directory}\"" for directory in include_filter])
         files_to_skip = "|".join([f"\"{directory}\"" for directory in exclude_filter])
+        drive_letter = f"{drive}:\\"
 
         # if drive missing, write file is missing and rename last recorded file
-        if not os.path.exists(drive + ":\\"):
-            print(f"MISSING: Drive {drive}:\\ no longer exists. It's gone.")
+        if not os.path.exists(drive_letter):
+            print(f"MISSING: Drive {drive_letter} no longer exists. It's gone.")
             missing_file_path = os.path.join(scan_parameters["Output"], f"{drive}_missingdrive.txt")
             with open(missing_file_path, 'a', encoding='utf-8') as missing_file:
-                missing_file.write(f"Drive {drive}:\\ is missing as of {time_stamp}.\n")
+                missing_file.write(f"Drive {drive_letter} is missing as of {time_stamp}.\n")
             print(f"INFO: Missing drive note written to {missing_file_path}")
             make_file_record_first_time_missing(output_file_path)
             make_file_record_first_time_missing(backup_file_path)
