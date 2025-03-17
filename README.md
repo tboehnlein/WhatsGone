@@ -8,6 +8,8 @@ This is the perfect software to use to archive a list of your files no matter ho
 ## Operation
 If the drive is there, it will make a record of all of the files that match the filter patterns with their paths into a text file.
 
+If there is a backup directory, the record will also get copied there.
+
 If a drive is missing, a timestamped message will be recorded in a file so it is known when it is missing.
 
 If the drive has nothing in it, it will not overwrite an existing file.
