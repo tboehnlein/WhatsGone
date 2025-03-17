@@ -154,6 +154,52 @@ def make_file_record_first_time_missing(output_file_path):
     if os.path.exists(output_file_path) and not os.path.exists(rename_file_path):
         os.rename(output_file_path, rename_file_path)
 
+def get_scan_parameters(scan_parameters, tag):
+    """
+    Extracts and returns the scan parameters for a given tag.
+
+    Args:
+        scan_parameters (dict): The dictionary containing scan parameters.
+        tag (str): The tag for the current scan.
+
+    Returns:
+        tuple: A tuple containing include_filter, exclude_filter, backup_file_path, and drive.
+    """
+    include_filter = scan_parameters.get("Include", [])
+    exclude_filter = scan_parameters.get("Exclude", [])
+    backup_file_path = None
+
+    if "Backup" in scan_parameters:
+        drive = scan_parameters.get("Drive", "")
+        backup_file_path = rf"{scan_parameters['Backup']}/{drive}_{tag}.txt"
+        ensure_folder_exists(backup_file_path)
+
+    drive = scan_parameters.get("Drive", None)
+
+    if not drive:
+        print(f"MISSING: Drive parameter not specified. Skipping {tag} scan.")
+        return None, None, None, None
+
+    return include_filter, exclude_filter, backup_file_path, drive
+
+def backup_file(output_file_path, backup_file_path):
+    """
+    Copies the output file to the backup location, overwriting if it exists.
+
+    Args:
+        output_file_path (str): The path of the output file to back up.
+        backup_file_path (str): The path of the backup file location.
+
+    Returns:
+        None
+    """
+    if backup_file_path is not None:
+        try:
+            shutil.copy(output_file_path, backup_file_path)
+            print(f"COMPLETED: {output_file_path} has been backed up to {backup_file_path}.")
+        except Exception as e:
+            print(f"ERROR: Failed to back up {output_file_path} to {backup_file_path}. Reason: {e}")
+
 if __name__ == "__main__":
 
 
@@ -202,26 +248,10 @@ if __name__ == "__main__":
     output_folder = "C:/WhatsGone"
     
     for tag, scan_parameters in scan_runs.items():
-        if "Include" in scan_parameters:
-            include_filter = scan_parameters["Include"]
-        else:
-            include_filter = []
+        
+        drive, backup_file_path, exclude_filter, include_filter = get_scan_parameters(scan_parameters, tag)
 
-        if "Exclude" in scan_parameters:
-            exclude_filter = scan_parameters["Exclude"]
-        else:
-            exclude_filter = []
-
-        if "Backup" in scan_parameters:
-            backup_file_path = rf"{scan_parameters['Backup']}/{drive}_{tag}.txt"
-            ensure_folder_exists(backup_file_path)
-        else:
-            backup_file_path = None
-
-        if "Drive" in scan_parameters:
-            drive = scan_parameters["Drive"]
-        else:
-            print(f"MISSING: Drive parameter not specified. Skipping {tag} scan.")
+        if drive is None:
             continue
 
         scan_drive = drive + ":"
@@ -229,7 +259,7 @@ if __name__ == "__main__":
         files_to_scan = "|".join([f"\"{directory}\"" for directory in include_filter])
         files_to_skip = "|".join([f"\"{directory}\"" for directory in exclude_filter])
 
-        # Skip to the next item if the drive does not exist
+        # if drive missing, write file is missing and rename last recorded file
         if not os.path.exists(drive + ":\\"):
             print(f"MISSING: Drive {drive}:\\ no longer exists. It's gone.")
             missing_file_path = os.path.join(scan_parameters["Output"], f"{drive}_missingdrive.txt")
@@ -243,13 +273,7 @@ if __name__ == "__main__":
         get_files_with_wiztree(wiztree_executable, scan_drive, tag, files_to_scan, files_to_skip, output_file_path)
         process_output_file(output_file_path)
 
-        if backup_file_path is not None:
-            # Copy the output file to the backup location, overwriting if it exists
-            try:
-                shutil.copy(output_file_path, backup_file_path)
-                print(f"COMPLETED: {output_file_path} has been backed up to {backup_file_path}.")
-            except Exception as e:
-                print(f"ERROR: Failed to back up {output_file_path} to {backup_file_path}. Reason: {e}")
+        backup_file(output_file_path, backup_file_path)
 
 
 
