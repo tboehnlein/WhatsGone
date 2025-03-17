@@ -109,7 +109,7 @@ def process_output_file(output_file_path):
             next(reader, None)  # Skip the header or first line
             first_items = [row[0] for row in reader if row and len(row) > 0]
 
-        if len(first_items) > 2:
+        if len(first_items) < 2:
             print(f"ERROR: {output_file_path} has no files. Current files will not be overwritten.")
             return False
 
