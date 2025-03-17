@@ -249,7 +249,7 @@ if __name__ == "__main__":
     
     for tag, scan_parameters in scan_runs.items():
         
-        drive, backup_file_path, exclude_filter, include_filter = get_scan_parameters(scan_parameters, tag)
+        include_filter, exclude_filter, backup_file_path, drive = get_scan_parameters(scan_parameters, tag)
 
         if drive is None:
             continue
@@ -258,7 +258,7 @@ if __name__ == "__main__":
         output_file_path = rf"{scan_parameters['Output']}/{drive}_{tag}.txt"
         files_to_scan = "|".join([f"\"{directory}\"" for directory in include_filter])
         files_to_skip = "|".join([f"\"{directory}\"" for directory in exclude_filter])
-        drive_letter = f"{drive}:\\"
+        drive_letter = f"{scan_drive}\\"
 
         # if drive missing, write file is missing and rename last recorded file
         if not os.path.exists(drive_letter):
