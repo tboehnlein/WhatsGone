@@ -210,39 +210,39 @@ if __name__ == "__main__":
     time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     scan_runs = {
-        # "Everything": {
-        #     "Exclude": ["$", "WindowsApps"],
-        #     "Drive": "X",
-        #     "Output": "C:/WhatsGone",
-        #     "Backup": "D:/WhatsGone"
-        # },
+        "Everything": {
+            "Exclude": ["$", "WindowsApps"],
+            "Drive": "B",
+            "Output": "C:\\WhatsGone",
+            "Backup": "D:\\WhatsGone"
+        },
         "Music": {
             "Include": ["*.mp3"],
             "Exclude": ["$", "WindowsApps"],
             "Drive": "M",
-            "Output": "C:/WhatsGone",
-            "Backup": "D:/WhatsGone"
+            "Output": "C:\\WhatsGone",
+            "Backup": "D:\\WhatsGone"
         },
         # "TV Shows": {
         #     "Include": ["Videos\\TV"],
         #     #"Exclude": ["Windows"],
         #     "Drive": "X",
-        #     "Output": "C:/WhatsGone",
-        #     "Backup": "D:/WhatsGone"
+        #     "Output": "C:\\WhatsGone",
+        #     "Backup": "D:\\WhatsGone"
         # },
         # "Movies": {
         #     "Include": ["Videos\\Movies"],
         #     #"Exclude": ["Windows"],
         #     "Drive": "X",
-        #     "Output": "C:/WhatsGone",
-        #     "Backup": "D:/WhatsGone"
+        #     "Output": "C:\\WhatsGone",
+        #     "Backup": "D:\\WhatsGone"
         # },
         # "Plex": {
         #     "Include": ["Videos\\Temporary", "Videos\\Plex"],
         #     #"Exclude": ["Windows"],
         #     "Drive": "F",
-        #     "Output": "C:/WhatsGone",
-        #     "Backup": "D:/WhatsGone"
+        #     "Output": "C:\\WhatsGone",
+        #     "Backup": "D:\\WhatsGone"
         # }
     }
     output_folder = "C:/WhatsGone"
