@@ -18,11 +18,11 @@ extracting file information, and processing the results. It includes the followi
     - Processes the output file to extract only file paths and overwrite the file with just the file paths.
 
 The script is designed to work with administrative privileges and assumes WizTree is installed and accessible at the specified path.
-""" 
+"""
 
 def get_files_with_wiztree(wiztree_path, drive, tag, include_filter, exclude_filter, output_file):
     """
-    Executes the WizTree application to retrieve file information from a specified directory 
+    Executes the WizTree application to retrieve file information from a specified directory
     on a given drive and exports the results to an output file.
     Args:
         wiztree_path (str): The file path to the WizTree executable.
@@ -46,18 +46,18 @@ def get_files_with_wiztree(wiztree_path, drive, tag, include_filter, exclude_fil
 
         # Ensure the folder path for the output file exists
         ensure_folder_exists(output_file_path)
-        
+
         # Command to call WizTree with the specified directory and output file
         command = [wiztree_path, drive, f"/filter={include_filter}", f"/filterexclude={exclude_filter}", f"/export=\"{output_file}\"", r"/admin=1", r"/exportfolders=0"]
-        
+
         admin_command = ["powershell", "-Command", f"Start-Process -FilePath '{command[0]}' -ArgumentList '{' '.join(command[1:])}' -Verb RunAs"]
 
         # Run the WizTree command with elevated privileges
         result = subprocess.run(admin_command, capture_output=True, text=True, check=True, shell=True)
-        
+
         # Wait for WizTree to finish
         wait_for_process_to_finish("WizTree64.exe")
-        #wait_for_process_to_finish("WizTree.exe")        
+        #wait_for_process_to_finish("WizTree.exe")
 
         # Print the output from WizTree
         # print("WizTree Output:", result.stdout)
@@ -80,20 +80,20 @@ def wait_for_process_to_finish(process_name, check_interval=1):
         Returns:
             None
         """
-        
+
         while any(proc.name().lower() == process_name.lower() for proc in psutil.process_iter(attrs=['name'])):
             print(f"Waiting for {process_name} to finish...", end="\r", flush=True)
             time.sleep(check_interval)
-        
+
         print(f"Waiting for {process_name} to finish...")
 
         print(f"DONE: {process_name} has finished")
 
 def process_output_file(output_file_path):
         """
-        Reads the output file, extracts the first item from each row, 
+        Reads the output file, extracts the first item from each row,
         and overwrites the file with the extracted items.
-        
+
         Args:
             output_file_path (str): The path to the output file to process.
         """
@@ -128,7 +128,7 @@ def process_output_file(output_file_path):
 def ensure_folder_exists(file_path):
     """
     Ensures that the specified folder exists. If it does not exist, creates it.
-    
+
     Args:
         file_path (str): The path of the file to check or create.
     """
@@ -138,6 +138,22 @@ def ensure_folder_exists(file_path):
         os.makedirs(folder_path)
         print(f"Created folder: {folder_path}")
 
+def make_file_record_first_time_missing(output_file_path):
+    """
+    Renames the output file if it already exists to prevent overwriting when the drive is added back.
+
+    Args:
+        output_file_path (str): The path of the output file to check and rename if necessary.
+    """
+
+    if output_file_path is None:
+        return
+
+    base, ext = os.path.splitext(output_file_path)
+    rename_file_path = f"{base}_whats_gone{ext}"
+    if os.path.exists(output_file_path) and not os.path.exists(rename_file_path):
+        os.rename(output_file_path, rename_file_path)
+
 if __name__ == "__main__":
 
 
@@ -145,51 +161,65 @@ if __name__ == "__main__":
     #date_time = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     wiztree_executable = "C:/Program Files/WizTree/WizTree64.exe"
+    time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     scan_runs = {
-        "Everything": {
+        # "Everything": {
+        #     "Exclude": ["$", "WindowsApps"],
+        #     "Drive": "X",
+        #     "Output": "C:/WhatsGone",
+        #     "Backup": "D:/WhatsGone"
+        # },
+        "Music": {
+            "Include": ["*.mp3"],
             "Exclude": ["$", "WindowsApps"],
-            "Drive": "X",
+            "Drive": "M",
             "Output": "C:/WhatsGone",
             "Backup": "D:/WhatsGone"
         },
-        "TV Shows": {
-            "Include": ["Videos\\TV"],
-            #"Exclude": ["Windows"],
-            "Drive": "X",
-            "Output": "C:/WhatsGone",
-            "Backup": "D:/WhatsGone"
-        },
-        "Movies": {
-            "Include": ["Videos\\Movies"],
-            #"Exclude": ["Windows"],
-            "Drive": "X",
-            "Output": "C:/WhatsGone",
-            "Backup": "D:/WhatsGone"
-        },
-        "Plex": {
-            "Include": ["Videos\\Temporary", "Videos\\Plex"],
-            #"Exclude": ["Windows"],
-            "Drive": "F",
-            "Output": "C:/WhatsGone",
-            "Backup": "D:/WhatsGone"
-        }
+        # "TV Shows": {
+        #     "Include": ["Videos\\TV"],
+        #     #"Exclude": ["Windows"],
+        #     "Drive": "X",
+        #     "Output": "C:/WhatsGone",
+        #     "Backup": "D:/WhatsGone"
+        # },
+        # "Movies": {
+        #     "Include": ["Videos\\Movies"],
+        #     #"Exclude": ["Windows"],
+        #     "Drive": "X",
+        #     "Output": "C:/WhatsGone",
+        #     "Backup": "D:/WhatsGone"
+        # },
+        # "Plex": {
+        #     "Include": ["Videos\\Temporary", "Videos\\Plex"],
+        #     #"Exclude": ["Windows"],
+        #     "Drive": "F",
+        #     "Output": "C:/WhatsGone",
+        #     "Backup": "D:/WhatsGone"
+        # }
     }
     output_folder = "C:/WhatsGone"
-
+    
     for tag, scan_parameters in scan_runs.items():
         if "Include" in scan_parameters:
             include_filter = scan_parameters["Include"]
         else:
             include_filter = []
-        
+
         if "Exclude" in scan_parameters:
-            exclude_filter = scan_parameters["Exclude"] 
+            exclude_filter = scan_parameters["Exclude"]
         else:
             exclude_filter = []
 
+        if "Backup" in scan_parameters:
+            backup_file_path = rf"{scan_parameters['Backup']}/{drive}_{tag}.txt"
+            ensure_folder_exists(backup_file_path)
+        else:
+            backup_file_path = None
+
         if "Drive" in scan_parameters:
-            drive = scan_parameters["Drive"] 
+            drive = scan_parameters["Drive"]
         else:
             print(f"MISSING: Drive parameter not specified. Skipping {tag} scan.")
             continue
@@ -204,23 +234,22 @@ if __name__ == "__main__":
             print(f"MISSING: Drive {drive}:\\ no longer exists. It's gone.")
             missing_file_path = os.path.join(scan_parameters["Output"], f"{drive}_missingdrive.txt")
             with open(missing_file_path, 'a', encoding='utf-8') as missing_file:
-                missing_file.write(f"Drive {drive}:\\ is missing as of {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}.\n")
+                missing_file.write(f"Drive {drive}:\\ is missing as of {time_stamp}.\n")
             print(f"INFO: Missing drive note written to {missing_file_path}")
-            continue
+            make_file_record_first_time_missing(output_file_path)
+            make_file_record_first_time_missing(backup_file_path)
+            continue        
 
         get_files_with_wiztree(wiztree_executable, scan_drive, tag, files_to_scan, files_to_skip, output_file_path)
         process_output_file(output_file_path)
 
-        if "Backup" in scan_parameters:
-            backup_file_path = rf"{scan_parameters['Backup']}/{drive}_{tag}.txt"
-            ensure_folder_exists(backup_file_path)
-
+        if backup_file_path is not None:
             # Copy the output file to the backup location, overwriting if it exists
             try:
                 shutil.copy(output_file_path, backup_file_path)
                 print(f"COMPLETED: {output_file_path} has been backed up to {backup_file_path}.")
             except Exception as e:
                 print(f"ERROR: Failed to back up {output_file_path} to {backup_file_path}. Reason: {e}")
-            
-        
-        
+
+
+
